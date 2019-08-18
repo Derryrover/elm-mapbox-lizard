@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Main</title>
+
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css' rel='stylesheet' />
+  <script src="../node_modules/elm-mapbox/dist/elm-mapbox.umd.js"></script>
+  
+</head>
+
+<body>
+
+<script src="main.js"></script> 
+<div id="main_elm" style="height:100%;width:100%;"></div>
+<script>
+
+elmMapbox.registerCustomElement({token: 'pk.eyJ1IjoidG9tZGVib2VyMjkxMCIsImEiOiJjamtkcGp5OXQxaG1nM2tudnBvcmQwOTRoIn0.7LDZekdcKh7afE4JaJxPhg'});
+var app = Elm.Main.init({
+  node : document.getElementById('main_elm')
+});
+elmMapbox.registerPorts(app);
+
+// var app = Elm.Main.init({ 
+//   node : document.getElementById('main_elm'),
+//   flags: Math.floor(Math.random()*0x0FFFFFFF) 
+// });
+// Note: if your Elm module is named "MyThing.Root" you
+// would call "Elm.MyThing.Root.init({ node : node });" instead.
+
+// if elm app should be fullscreen this is also possible
+//var app = Elm.RubicsCube.fullscreen();
+
+// example port
+// app.ports.setSelectToDefault.subscribe(function(id) {
+//   // console.log(id);
+//   var element = document.getElementById(id);
+//   // console.log(element);
+//   element.value = "select new item";
+// });
+
+</script>
+
+<style>
+body {
+    height: 100vh;
+    min-height: 100vh;
+    margin: 0px;
+}
+</style>
+
+
+
+
+</body>
+</html>
