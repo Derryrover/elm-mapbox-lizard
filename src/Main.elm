@@ -1,156 +1,165 @@
-module Main exposing (main)
+port module Main exposing (Model, Msg(..), add1, init, main, toJs, update, view)
 
 import Browser
-import Html exposing (div, text)
-import Html.Attributes exposing (style)
-import Json.Decode
-import Json.Encode
-import LngLat exposing (LngLat)
-import MapCommands
-import Mapbox.Cmd.Option as Opt
-import Mapbox.Element exposing (..)
-import Mapbox.Expression as E exposing (false, float, int, str, true)
-import Mapbox.Layer as Layer
-import Mapbox.Source as Source
-import Mapbox.Style as Style exposing (Style(..))
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
+import Http exposing (Error(..))
+import Json.Decode as Decode
 
 
-main =
-    Browser.document
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = \m -> Sub.none
-        }
+
+-- ---------------------------
+-- PORTS
+-- ---------------------------
 
 
-init () =
-    ( { position = LngLat 0 0, features = [] }, Cmd.none )
+port toJs : String -> Cmd msg
+
+
+
+-- ---------------------------
+-- MODEL
+-- ---------------------------
+
+
+type alias Model =
+    { counter : Int
+    , serverMessage : String
+    }
+
+
+init : Int -> ( Model, Cmd Msg )
+init flags =
+    ( { counter = flags, serverMessage = "" }, Cmd.none )
+
+
+
+-- ---------------------------
+-- UPDATE
+-- ---------------------------
 
 
 type Msg
-    = Hover EventData
-    | Click EventData
+    = Inc
+    | Set Int
+    | TestServer
+    | OnServerResponse (Result Http.Error String)
 
 
-update msg model =
-    case msg of
-        Hover { lngLat, renderedFeatures } ->
-            ( { model | position = lngLat, features = renderedFeatures }, Cmd.none )
+update : Msg -> Model -> ( Model, Cmd Msg )
+update message model =
+    case message of
+        Inc ->
+            ( add1 model, toJs "Hello Js" )
 
-        Click { lngLat, renderedFeatures } ->
-            ( { model | position = lngLat, features = renderedFeatures }, MapCommands.fitBounds [ Opt.linear True, Opt.maxZoom 10 ] ( LngLat.map (\a -> a - 0.2) lngLat, LngLat.map (\a -> a + 0.2) lngLat ) )
+        Set m ->
+            ( { model | counter = m }, toJs "Hello Js" )
 
+        TestServer ->
+            let
+                expect =
+                    Http.expectJson OnServerResponse (Decode.field "result" Decode.string)
+            in
+            ( model
+            , Http.get { url = "/test", expect = expect }
+            )
 
-geojson =
-    Json.Decode.decodeString Json.Decode.value """
-{
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "id": 1,
-      "properties": {
-        "name": "Bermuda Triangle",
-        "area": 1150180
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [-64.73, 32.31],
-            [-80.19, 25.76],
-            [-66.09, 18.43],
-            [-64.73, 32.31]
-          ]
-        ]
-      }
-    }
-  ]
-}
-""" |> Result.withDefault (Json.Encode.object [])
+        OnServerResponse res ->
+            case res of
+                Ok r ->
+                    ( { model | serverMessage = r }, Cmd.none )
+
+                Err err ->
+                    ( { model | serverMessage = "Error: " ++ httpErrorToString err }, Cmd.none )
 
 
-hoveredFeatures : List Json.Encode.Value -> MapboxAttr msg
-hoveredFeatures =
-    List.map (\feat -> ( feat, [ ( "hover", Json.Encode.bool True ) ] ))
-        >> featureState
+httpErrorToString : Http.Error -> String
+httpErrorToString err =
+    case err of
+        BadUrl _ ->
+            "BadUrl"
+
+        Timeout ->
+            "Timeout"
+
+        NetworkError ->
+            "NetworkError"
+
+        BadStatus _ ->
+            "BadStatus"
+
+        BadBody s ->
+            "BadBody: " ++ s
 
 
+{-| increments the counter
+
+    add1 5 --> 6
+
+-}
+add1 : Model -> Model
+add1 model =
+    { model | counter = model.counter + 1 }
+
+
+
+-- ---------------------------
+-- VIEW
+-- ---------------------------
+
+
+view : Model -> Html Msg
 view model =
-    { title = "Mapbox Example"
-    , body =
-        [ css
-        , div [ style "width" "100vw", style "height" "100vh" ]
-            [ map
-                [ maxZoom 5
-                , onMouseMove Hover
-                , onClick Click
-                , id "my-map"
-                , eventFeaturesLayers [ "changes" ]
-                , hoveredFeatures model.features
+    div [ class "container" ]
+        [ header []
+            [ -- img [ src "/images/logo.png" ] []
+              span [ class "logo" ] []
+            , h1 [] [ text "Elm 0.19 Webpack Starter, with hot-reloading" ]
+            ]
+        , p [] [ text "Click on the button below to increment the state." ]
+        , div [ class "pure-g" ]
+            [ div [ class "pure-u-1-3" ]
+                [ button
+                    [ class "pure-button pure-button-primary"
+                    , onClick Inc
+                    ]
+                    [ text "+ 1" ]
+                , text <| String.fromInt model.counter
                 ]
-                (Style
-                    { transition = Style.defaultTransition
-                    , light = Style.defaultLight
-                    , sources =
-                        [ Source.vectorFromUrl "composite" "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7,astrosat.07pz1g3y"
-                        , Source.geoJSONFromValue "changes" [] geojson
-                        ]
-                    , misc =
-                        [ Style.name "light"
-                        , Style.defaultCenter <| LngLat 20.39789404164037 43.22523201923144
-                        , Style.defaultZoomLevel 1.5967483759772743
-                        , Style.sprite "mapbox://sprites/mapbox/light"
-                        , Style.glyphs "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
-                        ]
-                    , layers =
-                        [ Layer.background "background"
-                            [ E.rgba 246 246 244 1 |> Layer.backgroundColor
-                            ]
-                        , Layer.fill "landcover"
-                            "composite"
-                            [ Layer.sourceLayer "landcover"
-                            , E.any
-                                [ E.getProperty (str "class") |> E.isEqual (str "wood")
-                                , E.getProperty (str "class") |> E.isEqual (str "scrub")
-                                , E.getProperty (str "class") |> E.isEqual (str "grass")
-                                , E.getProperty (str "class") |> E.isEqual (str "crop")
-                                ]
-                                |> Layer.filter
-                            , Layer.fillColor (E.rgba 227 227 227 1)
-                            , Layer.fillOpacity (float 0.6)
-                            ]
-                        , Layer.symbol "place-city-lg-n"
-                            "composite"
-                            [ Layer.sourceLayer "place_label"
-                            , Layer.minzoom 1
-                            , Layer.maxzoom 14
-                            , Layer.filter <|
-                                E.all
-                                    [ E.getProperty (str "scalerank") |> E.greaterThan (int 2)
-                                    , E.getProperty (str "type") |> E.isEqual (str "city")
-                                    ]
-                            , Layer.textField <|
-                                E.format
-                                    [ E.getProperty (str "name_en")
-                                        |> E.formatted
-                                        |> E.fontScaledBy (float 1.2)
-                                    , E.formatted (str "\n")
-                                    , E.getProperty (str "name")
-                                        |> E.formatted
-                                        |> E.fontScaledBy (float 0.8)
-                                        |> E.withFont (E.strings [ "DIN Offc Pro Medium" ])
-                                    ]
-                            ]
-                        , Layer.fill "changes"
-                            "changes"
-                            [ Layer.fillOpacity (E.ifElse (E.toBool (E.featureState (str "hover"))) (float 0.9) (float 0.1))
-                            ]
-                        ]
-                    }
-                )
-            , div [ style "position" "absolute", style "bottom" "20px", style "left" "20px" ] [ text (LngLat.toString model.position) ]
+            , div [ class "pure-u-1-3" ] []
+            , div [ class "pure-u-1-3" ]
+                [ button
+                    [ class "pure-button pure-button-primary"
+                    , onClick TestServer
+                    ]
+                    [ text "ping dev server" ]
+                , text model.serverMessage
+                ]
+            ]
+        , p [] [ text "Then make a change to the source code and see how the state is retained after you recompile. Is it?" ]
+        , p []
+            [ text "And now don't forget to add a star to the Github repo "
+            , a [ href "https://github.com/simonh1000/elm-webpack-starter" ] [ text "elm-webpack-starter" ]
             ]
         ]
-    }
+
+
+
+-- ---------------------------
+-- MAIN
+-- ---------------------------
+
+
+main : Program Int Model Msg
+main =
+    Browser.document
+        { init = init
+        , update = update
+        , view =
+            \m ->
+                { title = "Elm 0.19 starter"
+                , body = [ view m ]
+                }
+        , subscriptions = \_ -> Sub.none
+        }
