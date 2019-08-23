@@ -1,4 +1,5 @@
-module Main exposing (main)
+module Main2 exposing (Model, Msg, init, view, update)
+-- module Main2 exposing (main, update)
 
 import Browser
 import Html exposing (div, text)
@@ -14,25 +15,31 @@ import Mapbox.Layer as Layer
 import Mapbox.Source as Source
 import Mapbox.Style as Style exposing (Style(..))
 
-
-main =
-    Browser.document
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = \m -> Sub.none
-        }
-
-
-init () =
-    ( { position = LngLat 0 0, features = [] }, Cmd.none )
-
-
 type Msg
     = Hover EventData
     | Click EventData
 
+type alias Model = 
+    { features : List Json.Decode.Value
+    , position : LngLat.LngLat }
 
+-- main =
+--     Browser.document
+--         { init = init
+--         , view = view
+--         , update = update
+--         , subscriptions = \m -> Sub.none
+--         }
+
+init: () -> ( Model , Cmd msg )
+init () =
+    ( { position = LngLat 0 0, features = [] }, Cmd.none )
+
+
+
+
+
+update: Msg -> Model -> (Model, Cmd msg)
 update msg model =
     case msg of
         Hover { lngLat, renderedFeatures } ->
@@ -76,7 +83,7 @@ hoveredFeatures =
     List.map (\feat -> ( feat, [ ( "hover", Json.Encode.bool True ) ] ))
         >> featureState
 
-
+view: Model -> { body : List (Html.Html Msg), title : String }--Html.Html Msg
 view model =
     { title = "Mapbox Example"
     , body =

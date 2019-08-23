@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..))
 import Json.Decode as Decode
+import Main2
 
 
 
@@ -151,15 +152,27 @@ view model =
 -- ---------------------------
 
 
-main : Program Int Model Msg
+-- main : Program Int Model Msg
+-- main =
+--     Browser.document
+--         { init = Main2.init --init
+--         , update = Main2.update --update
+--         , view = 
+--             \m ->
+--                 { title = "Elm 0.19 starter"
+--                 , body = [ view m ]
+--                 }
+--         , subscriptions = \_ -> Sub.none
+--         }
+
 main =
     Browser.document
-        { init = init
-        , update = update
-        , view =
-            \m ->
-                { title = "Elm 0.19 starter"
-                , body = [ view m ]
-                }
+        { init = Main2.init
+        , update = Main2.update
+        , view =  Main2.view
+            -- \m ->
+            --     { title = "Elm 0.19 starter"
+            --     , body = [ view m ]
+            --     }
         , subscriptions = \_ -> Sub.none
         }
