@@ -15,6 +15,8 @@ import Mapbox.Layer as Layer
 import Mapbox.Source as Source
 import Mapbox.Style as Style exposing (Style(..))
 
+-- css2  = css
+
 type Msg
     = Hover EventData
     | Click EventData
@@ -83,12 +85,15 @@ hoveredFeatures =
     List.map (\feat -> ( feat, [ ( "hover", Json.Encode.bool True ) ] ))
         >> featureState
 
-view: Model -> { body : List (Html.Html Msg), title : String }--Html.Html Msg
+-- view: Model -> { body : List (Html.Html Msg), title : String }--Html.Html Msg
+view: Model ->  Html.Html Msg
 view model =
-    { title = "Mapbox Example"
-    , body =
-        [ css
-        , div [ style "width" "100vw", style "height" "100vh" ]
+    -- { title = "Mapbox Example"
+    -- , body =
+    --     [ 
+            -- css
+        -- , 
+        div [ style "width" "100vw", style "height" "100vh" ]
             [ map
                 [ maxZoom 5
                 , onMouseMove Hover
@@ -159,5 +164,5 @@ view model =
                 )
             , div [ style "position" "absolute", style "bottom" "20px", style "left" "20px" ] [ text (LngLat.toString model.position) ]
             ]
-        ]
-    }
+    --     ]
+    -- }

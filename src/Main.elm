@@ -8,6 +8,8 @@ import Http exposing (Error(..))
 import Json.Decode as Decode
 import Main2
 
+import Mapbox.Element exposing (css)
+
 
 
 -- ---------------------------
@@ -169,10 +171,15 @@ main =
     Browser.document
         { init = Main2.init
         , update = Main2.update
-        , view =  Main2.view
+        -- , view =  Main2.view
             -- \m ->
             --     { title = "Elm 0.19 starter"
             --     , body = [ view m ]
             --     }
+        , view =  
+            \model ->
+                { title = "Elm 0.19 starter"
+                , body = [ css,  Main2.view model ]
+                }
         , subscriptions = \_ -> Sub.none
         }
