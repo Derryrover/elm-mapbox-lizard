@@ -6,7 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..))
 import Json.Decode as Decode
-import Main2
+import MapBoxComponent
 
 import Mapbox.Element exposing (css)
 
@@ -29,12 +29,16 @@ port toJs : String -> Cmd msg
 type alias Model =
     { counter : Int
     , serverMessage : String
+    , mapBoxComponent : MapBoxComponent.Model
     }
 
 
 init : Int -> ( Model, Cmd Msg )
-init flags =
-    ( { counter = flags, serverMessage = "" }, Cmd.none )
+init flags = 
+    let
+        (mapBoxComponent, mapBoxCmd) = MapBoxComponent.init ()
+    in
+        ( { counter = flags, serverMessage = "", mapBoxComponent = mapBoxComponent }, Cmd.none )
 
 
 
@@ -48,6 +52,7 @@ type Msg
     | Set Int
     | TestServer
     | OnServerResponse (Result Http.Error String)
+    -- | MapboxGLMsg MapBoxComponent.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -169,8 +174,8 @@ view model =
 
 main =
     Browser.document
-        { init = Main2.init
-        , update = Main2.update
+        { init = MapBoxComponent.init
+        , update = MapBoxComponent.update
         -- , view =  Main2.view
             -- \m ->
             --     { title = "Elm 0.19 starter"
@@ -179,7 +184,7 @@ main =
         , view =  
             \model ->
                 { title = "Elm 0.19 starter"
-                , body = [ css,  Main2.view model ]
+                , body = [ css,  MapBoxComponent.view model ]
                 }
         , subscriptions = \_ -> Sub.none
         }

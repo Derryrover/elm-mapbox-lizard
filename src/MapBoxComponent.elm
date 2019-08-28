@@ -1,4 +1,4 @@
-module Main2 exposing (Model, Msg, init, view, update)
+module MapBoxComponent exposing (Model, Msg, init, view, update)
 -- module Main2 exposing (main, update)
 
 import Browser
