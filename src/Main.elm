@@ -38,7 +38,7 @@ init flags =
     let
         (mapBoxComponent, mapBoxCmd) = MapBoxComponent.init ()
     in
-        ( { counter = flags, serverMessage = "", mapBoxComponent = mapBoxComponent }, Cmd.none )
+        ( { counter = flags, serverMessage = "", mapBoxComponent = mapBoxComponent }, Cmd.batch [Cmd.none,  mapBoxCmd])
 
 
 
@@ -52,12 +52,17 @@ type Msg
     | Set Int
     | TestServer
     | OnServerResponse (Result Http.Error String)
-    -- | MapboxGLMsg MapBoxComponent.Msg
+    | MapboxGLMsg MapBoxComponent.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
+        MapboxGLMsg mapboxGLMsg ->
+            let
+                (mapBoxComponent, mapBoxCmd) = MapBoxComponent.update mapboxGLMsg model.mapBoxComponent
+            in
+                ( { model | mapBoxComponent = mapBoxComponent }, Cmd.map MapboxGLMsg mapBoxCmd )
         Inc ->
             ( add1 model, toJs "Hello Js" )
 
@@ -150,6 +155,7 @@ view model =
             [ text "And now don't forget to add a star to the Github repo "
             , a [ href "https://github.com/simonh1000/elm-webpack-starter" ] [ text "elm-webpack-starter" ]
             ]
+        , Html.map MapboxGLMsg (MapBoxComponent.view model.mapBoxComponent)
         ]
 
 
@@ -159,32 +165,32 @@ view model =
 -- ---------------------------
 
 
--- main : Program Int Model Msg
--- main =
---     Browser.document
---         { init = Main2.init --init
---         , update = Main2.update --update
---         , view = 
---             \m ->
---                 { title = "Elm 0.19 starter"
---                 , body = [ view m ]
---                 }
---         , subscriptions = \_ -> Sub.none
---         }
-
+main : Program Int Model Msg
 main =
     Browser.document
-        { init = MapBoxComponent.init
-        , update = MapBoxComponent.update
-        -- , view =  Main2.view
-            -- \m ->
-            --     { title = "Elm 0.19 starter"
-            --     , body = [ view m ]
-            --     }
-        , view =  
-            \model ->
+        { init = init
+        , update = update
+        , view = 
+            \m ->
                 { title = "Elm 0.19 starter"
-                , body = [ css,  MapBoxComponent.view model ]
+                , body = [ view m ]
                 }
         , subscriptions = \_ -> Sub.none
         }
+
+-- main =
+--     Browser.document
+--         { init = MapBoxComponent.init
+--         , update = MapBoxComponent.update
+--         -- , view =  Main2.view
+--             -- \m ->
+--             --     { title = "Elm 0.19 starter"
+--             --     , body = [ view m ]
+--             --     }
+--         , view =  
+--             \model ->
+--                 { title = "Elm 0.19 starter"
+--                 , body = [ css,  MapBoxComponent.view model ]
+--                 }
+--         , subscriptions = \_ -> Sub.none
+--         }
