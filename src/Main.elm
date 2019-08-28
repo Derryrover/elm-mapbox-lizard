@@ -6,9 +6,14 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..))
 import Json.Decode as Decode
-import MapBoxComponent
 
+-- own build elm
+import MapBoxComponent
+import ApiRequestExample
+
+-- libraries
 import Mapbox.Element exposing (css)
+
 
 
 
@@ -30,6 +35,7 @@ type alias Model =
     { counter : Int
     , serverMessage : String
     , mapBoxComponent : MapBoxComponent.Model
+    , apiRequestExample : ApiRequestExample.Model
     }
 
 
@@ -37,8 +43,14 @@ init : Int -> ( Model, Cmd Msg )
 init flags = 
     let
         (mapBoxComponent, mapBoxCmd) = MapBoxComponent.init ()
+        (apiRequestExampleModel, apiRequestExampleCmd) = ApiRequestExample.init ()
     in
-        ( { counter = flags, serverMessage = "", mapBoxComponent = mapBoxComponent }, Cmd.batch [Cmd.none,  mapBoxCmd])
+        ( 
+            { counter = flags
+            , serverMessage = ""
+            , mapBoxComponent =  mapBoxComponent 
+            , apiRequestExample = apiRequestExampleModel}
+        , Cmd.batch [Cmd.none, Cmd.map MapboxGLMsg mapBoxCmd, Cmd.map ApiRequestExampleMsg apiRequestExampleCmd] )
 
 
 
@@ -53,11 +65,17 @@ type Msg
     | TestServer
     | OnServerResponse (Result Http.Error String)
     | MapboxGLMsg MapBoxComponent.Msg
+    | ApiRequestExampleMsg ApiRequestExample.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
+        ApiRequestExampleMsg apiRequestExampleMsg ->
+            let
+                (apiRequestExampleModel, apiRequestExampleCmd) = ApiRequestExample.update apiRequestExampleMsg model.apiRequestExample
+            in
+                ( { model | apiRequestExample = apiRequestExampleModel }, Cmd.map ApiRequestExampleMsg apiRequestExampleCmd )
         MapboxGLMsg mapboxGLMsg ->
             let
                 (mapBoxComponent, mapBoxCmd) = MapBoxComponent.update mapboxGLMsg model.mapBoxComponent
@@ -156,6 +174,7 @@ view model =
             , a [ href "https://github.com/simonh1000/elm-webpack-starter" ] [ text "elm-webpack-starter" ]
             ]
         , Html.map MapboxGLMsg (MapBoxComponent.view model.mapBoxComponent)
+        , Html.map ApiRequestExampleMsg (ApiRequestExample.view model.apiRequestExample)
         ]
 
 
