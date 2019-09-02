@@ -119,7 +119,17 @@ if (MODE === "development") {
                 app.get("/test", function(req, res) {
                     res.json({ result: "OK" });
                 });
-            }
+            },
+            proxy: [
+                { 
+                   context: "/api",
+                   target: "https://nxt3.staging.lizard.net",
+                   secure: false,
+                   changeOrigin: true,
+                   ssl: false,
+                   logLevel: 'debug',
+               }
+           ],
         }
     });
 }
