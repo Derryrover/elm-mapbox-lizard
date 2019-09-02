@@ -130,8 +130,8 @@ if (MODE === "development") {
                    ssl: false,
                    logLevel: 'debug',
                    headers: {
-                    "username": process.env.PROXY_PASSWORD || "",
-                    "password": process.env.PROXY_USERNAME || "",
+                    "username": process.env.PROXY_USERNAME,
+                    "password": process.env.PROXY_PASSWORD,
                   }
                }
            ],
