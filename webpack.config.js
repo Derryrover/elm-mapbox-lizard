@@ -123,11 +123,16 @@ if (MODE === "development") {
             proxy: [
                 { 
                    context: "/api",
-                   target: "https://nxt3.staging.lizard.net",
+                    //    target: "https://nxt3.staging.lizard.net",
+                    target: "https://demo.lizard.net",
                    secure: false,
                    changeOrigin: true,
                    ssl: false,
                    logLevel: 'debug',
+                   headers: {
+                    "username": process.env.PROXY_PASSWORD || "",
+                    "password": process.env.PROXY_USERNAME || "",
+                  }
                }
            ],
         }
