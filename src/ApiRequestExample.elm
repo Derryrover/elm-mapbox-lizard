@@ -9,6 +9,8 @@ module ApiRequestExample exposing( Model, Msg, init, update, view)
 import Browser
 import Html exposing (Html, text, pre)
 import Http
+import Json.Decode
+import List
 
 
 
@@ -33,15 +35,41 @@ type Model
   | Loading
   | Success String
 
+type alias Raster = 
+  { url: String
+  , uuid: String 
+  , name: String 
+  }
+
+
 
 init : () -> (Model, Cmd Msg)
 init _ =
   ( Loading
   , Http.get
-      { url = "https://elm-lang.org/assets/public-opinion.txt"
-      , expect = Http.expectString GotText
+      -- { url = "https://elm-lang.org/assets/public-opinion.txt"
+      -- , expect = Http.expectString GotText
+      -- }
+      { url = "/api/v3/rasters/"
+      , expect = Http.expectJson GotText rasterJsonDecoded
       }
   )
+
+rasterJsonDecoded : Json.Decode.Decoder String
+rasterJsonDecoded =
+  -- Json.Decode.field "data" (Json.Decode.field "image_url" Json.Decode.string)
+  Json.Decode.field "next" Json.Decode.string
+
+-- rasterDecoder: Json.Decode.Decoder Raster
+-- rasterDecoder =
+--   Json.Decode.map3 Raster
+--     (Json.Decode.field "url" Json.Decode.string)
+--     (Json.Decode.field "uuid" Json.Decode.string)
+--     (Json.Decode.field "name" Json.Decode.string)
+
+-- rasterListDecoder: Json.Decode.Decoder (List Raster)
+-- rasterListDecoder =
+--   Json.Decode.list rasterDecoder
 
 
 
