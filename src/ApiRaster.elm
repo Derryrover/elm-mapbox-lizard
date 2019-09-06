@@ -1,21 +1,17 @@
 module ApiRaster exposing( Model, Msg, init, update, view)
 
-import Browser
 import Html exposing (Html, text, pre, br)
 import Http
 import Json.Decode
--- import Json.Decode.Pipeline exposing (decode, required, optional)
 import List
 import Maybe
 import String
 
--- MODEL
+import RasterTypes exposing(Raster)
 
-type alias Raster = 
-  { url: String
-  , uuid: String 
-  , name: String 
-  }
+
+
+-- MODEL
 
 type alias ApiRasterResult = 
   { count: Int
