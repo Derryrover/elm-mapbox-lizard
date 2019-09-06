@@ -1,7 +1,7 @@
 module ApiRaster exposing( Model, Msg, init, update, view)
 
 import Browser
-import Html exposing (Html, text, pre)
+import Html exposing (Html, text, pre, br)
 import Http
 import Json.Decode
 -- import Json.Decode.Pipeline exposing (decode, required, optional)
@@ -27,7 +27,7 @@ type alias ApiRasterResult =
 type Model
   = Failure
   | Loading
-  | Success String
+  | Success ApiRasterResult
 
 
 
@@ -76,7 +76,7 @@ update msg model =
     ParsedJson result ->
       case result of
         Ok parsedJson ->
-          (Success (String.fromInt parsedJson.count), Cmd.none)
+          (Success parsedJson, Cmd.none)
 
         Err _ ->
           (Failure, Cmd.none)
@@ -104,5 +104,23 @@ view model =
     Loading ->
       text "Loading..."
 
-    Success fullText ->
-      pre [] [ text fullText ]
+    Success parsedJson ->
+      let
+         next = 
+          case parsedJson.next of
+            Nothing -> ""
+            Just str -> str
+         previous = 
+          case parsedJson.previous of
+            Nothing -> "bla"
+            Just str -> str 
+      in
+      
+        pre 
+          [] 
+          [ text (String.fromInt (parsedJson.count)) 
+          , br [] []
+          , text next
+          , br [] []
+          , text previous
+          ]
