@@ -35,11 +35,11 @@ type Model
   | Loading
   | Success String
 
-type alias Raster = 
-  { url: String
-  , uuid: String 
-  , name: String 
-  }
+-- type alias Raster = 
+--   { url: String
+--   , uuid: String 
+--   , name: String 
+--   }
 
 
 
