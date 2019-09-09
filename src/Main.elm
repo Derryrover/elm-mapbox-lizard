@@ -11,6 +11,7 @@ import Json.Decode as Decode
 import MapBoxComponent
 import ApiRequestExample
 import ApiRaster
+import RasterList
 
 -- libraries
 import Mapbox.Element exposing (css)
@@ -38,6 +39,7 @@ type alias Model =
     , mapBoxComponent : MapBoxComponent.Model
     , apiRequestExample : ApiRequestExample.Model
     , apiRasterModel: ApiRaster.Model
+    , rasterListModel: RasterList.Model
     }
 
 
@@ -47,6 +49,7 @@ init flags =
         (mapBoxComponent, mapBoxCmd) = MapBoxComponent.init ()
         (apiRequestExampleModel, apiRequestExampleCmd) = ApiRequestExample.init ()
         (apiRasterModel, apiRasterCmd) = ApiRaster.init ()
+        (rasterListModel, rasterListCmd) = RasterList.init ()
     in
         ( 
             { counter = flags
@@ -54,12 +57,14 @@ init flags =
             , mapBoxComponent =  mapBoxComponent 
             , apiRequestExample = apiRequestExampleModel
             , apiRasterModel = apiRasterModel
+            , rasterListModel = rasterListModel
             }
         , Cmd.batch 
             [ Cmd.none
             , Cmd.map MapboxGLMsg mapBoxCmd
             , Cmd.map ApiRequestExampleMsg apiRequestExampleCmd
             , Cmd.map ApiRasterMsg apiRasterCmd
+            , Cmd.map RasterListMsg rasterListCmd
             ] 
         )
 
@@ -78,6 +83,7 @@ type Msg
     | MapboxGLMsg MapBoxComponent.Msg
     | ApiRequestExampleMsg ApiRequestExample.Msg
     | ApiRasterMsg ApiRaster.Msg
+    | RasterListMsg RasterList.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -93,6 +99,11 @@ update message model =
                 (apiRasterModel, apiRasterCmd) = ApiRaster.update apiRasterMsg model.apiRasterModel
             in
                 ( { model | apiRasterModel = apiRasterModel }, Cmd.map ApiRasterMsg apiRasterCmd )
+        RasterListMsg rasterListMsg ->
+            let
+                (rasterListModel, rasterListCmd) = RasterList.update rasterListMsg model.rasterListModel
+            in
+                ( { model | rasterListModel = rasterListModel }, Cmd.map RasterListMsg rasterListCmd )
         MapboxGLMsg mapboxGLMsg ->
             let
                 (mapBoxComponent, mapBoxCmd) = MapBoxComponent.update mapboxGLMsg model.mapBoxComponent
@@ -193,6 +204,7 @@ view model =
         , Html.map MapboxGLMsg (MapBoxComponent.view model.mapBoxComponent)
         , Html.map ApiRequestExampleMsg (ApiRequestExample.view model.apiRequestExample)
         , Html.map ApiRasterMsg (ApiRaster.view model.apiRasterModel)
+        , Html.map RasterListMsg (RasterList.view model.rasterListModel)
         ]
 
 

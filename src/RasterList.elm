@@ -6,15 +6,15 @@ import Html exposing (Html, text, pre, br)
 
 type alias Model = List Raster
 
-type Msg = ReceivedRaster Model
+type Msg = ReceivedRasters Model
 
-init: Model
-init = []
+init: () -> (Model, Cmd Msg)
+init _ = ([], Cmd.none)
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
   case msg of
-    ReceivedRaster rasters ->
+    ReceivedRasters rasters ->
       ( List.concat [model, rasters] , Cmd.none)
 
 view: Model -> Html Msg
