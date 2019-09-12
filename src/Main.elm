@@ -12,6 +12,7 @@ import MapBoxComponent
 import ApiRequestExample
 import ApiRaster
 import RasterList
+import RasterDataRouter
 
 -- libraries
 import Mapbox.Element exposing (css)
@@ -173,8 +174,8 @@ view model =
     div [ class "container" ]
         [ header []
             [ -- img [ src "/images/logo.png" ] []
-              span [ class "logo" ] []
-            , h1 [] [ text "Elm 0.19 Webpack Starter, with hot-reloading" ]
+            --   span [ class "logo" ] []
+            -- , h1 [] [ text "Elm 0.19 Webpack Starter, with hot-reloading" ]
             ]
         , p [] [ text "Click on the button below to increment the state." ]
         , div [ class "pure-g" ]

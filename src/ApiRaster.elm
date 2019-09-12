@@ -1,4 +1,4 @@
-module ApiRaster exposing( Model, Msg, init, update, view)
+module ApiRaster exposing( Model, Msg(..), init, update, view, ApiRasterResult)
 
 import Html exposing (Html, text, pre, br)
 import Http
@@ -63,7 +63,7 @@ rasterResultDecoder =
 
 
 type Msg
-  = ParsedJson (Result Http.Error ApiRasterResult)
+  = ParsedJson (Result Http.Error ApiRasterResult) | Emit ApiRasterResult
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -72,10 +72,12 @@ update msg model =
     ParsedJson result ->
       case result of
         Ok parsedJson ->
-          (Success parsedJson, Cmd.none)
+          (Success parsedJson, Cmd.map (always (Emit parsedJson)) Cmd.none )--Cmd.none)
 
         Err _ ->
           (Failure, Cmd.none)
+    Emit apiRasterResult ->
+      (model, Cmd.none)
 
 
 
