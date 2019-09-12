@@ -1,4 +1,4 @@
-module RasterList exposing (Model, Msg, init, update, view)
+module RasterList exposing (Model, Msg(..), init, update, view)
 
 import RasterTypes exposing(Raster)
 import List

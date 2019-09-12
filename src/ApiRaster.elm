@@ -8,6 +8,7 @@ import Maybe
 import String
 
 import RasterTypes exposing(Raster)
+import TaskRun
 
 
 
@@ -72,7 +73,7 @@ update msg model =
     ParsedJson result ->
       case result of
         Ok parsedJson ->
-          (Success parsedJson, Cmd.map (always (Emit parsedJson)) Cmd.none )--Cmd.none)
+          (Success parsedJson, TaskRun.run (Emit parsedJson))--Cmd.map (always (Emit parsedJson)) Cmd.none )--Cmd.none)
 
         Err _ ->
           (Failure, Cmd.none)

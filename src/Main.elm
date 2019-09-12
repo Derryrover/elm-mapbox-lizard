@@ -13,6 +13,7 @@ import ApiRequestExample
 import ApiRaster
 import RasterList
 import RasterDataRouter
+import TaskRun
 
 -- libraries
 import Mapbox.Element exposing (css)
@@ -98,8 +99,9 @@ update message model =
         ApiRasterMsg apiRasterMsg ->
             let
                 (apiRasterModel, apiRasterCmd) = ApiRaster.update apiRasterMsg model.apiRasterModel
+                emittedList = RasterDataRouter.getRasterListFromEmit apiRasterMsg
             in
-                ( { model | apiRasterModel = apiRasterModel }, Cmd.map ApiRasterMsg apiRasterCmd )
+                ( { model | apiRasterModel = apiRasterModel }, Cmd.batch [Cmd.map RasterListMsg (TaskRun.run emittedList)  ,Cmd.map ApiRasterMsg apiRasterCmd] )
         RasterListMsg rasterListMsg ->
             let
                 (rasterListModel, rasterListCmd) = RasterList.update rasterListMsg model.rasterListModel

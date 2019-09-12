@@ -1,6 +1,6 @@
-module RasterDataRouter exposing(..)
+module RasterDataRouter exposing(isEmitFromApi, getRasterListFromEmit)
 
-import ApiRaster --exposing (Msg(..))
+import ApiRaster
 import RasterList
 
 isEmitFromApi: ApiRaster.Msg -> Bool
@@ -11,4 +11,10 @@ isEmitFromApi msg =
     _ ->
       False
 
---getRasterListFromEmit: ApiRaster.Msg -> 
+getRasterListFromEmit: ApiRaster.Msg -> RasterList.Msg
+getRasterListFromEmit msg = 
+  case msg of
+    ApiRaster.Emit data ->
+      RasterList.ReceivedRasters data.results
+    _ ->
+      RasterList.ReceivedRasters []
