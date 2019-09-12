@@ -42,35 +42,6 @@ update msg model =
             ( { model | position = lngLat, features = renderedFeatures }, MapCommands.fitBounds [ Opt.linear True, Opt.maxZoom 10 ] ( LngLat.map (\a -> a - 0.2) lngLat, LngLat.map (\a -> a + 0.2) lngLat ) )
 
 
--- geojson =
---     Json.Decode.decodeString Json.Decode.value """
--- {
---   "type": "FeatureCollection",
---   "features": [
---     {
---       "type": "Feature",
---       "id": 1,
---       "properties": {
---         "name": "Bermuda Triangle",
---         "area": 1150180
---       },
---       "geometry": {
---         "type": "Polygon",
---         "coordinates": [
---           [
---             [-64.73, 32.31],
---             [-80.19, 25.76],
---             [-66.09, 18.43],
---             [-64.73, 32.31]
---           ]
---         ]
---       }
---     }
---   ]
--- }
--- """ |> Result.withDefault (Json.Encode.object [])
-
-
 hoveredFeatures : List Json.Encode.Value -> MapboxAttr msg
 hoveredFeatures =
     List.map (\feat -> ( feat, [ ( "hover", Json.Encode.bool True ) ] ))
@@ -94,11 +65,8 @@ view model =
                     { transition = Style.defaultTransition
                     , light = Style.defaultLight
                     , sources =
-                        [ 
-                            Source.vectorFromUrl "composite" "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7"
-                        -- , Source.geoJSONFromValue "changes" [] geojson
-                        , 
-                        Source.rasterFromUrl "height" "/api/v3/wms/?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=dem%3Anl&STYLES=dem-nl&FORMAT=image%2Fpng&TRANSPARENT=false&HEIGHT=256&WIDTH=256&TIME=2019-09-12T19%3A35%3A37&SRS=EPSG%3A3857&BBOX={bbox-epsg-3857}"
+                        [ Source.vectorFromUrl "composite" "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7"
+                        , Source.rasterFromUrl "height" "/api/v3/wms/?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=dem%3Anl&STYLES=dem-nl&FORMAT=image%2Fpng&TRANSPARENT=false&HEIGHT=256&WIDTH=256&TIME=2019-09-12T19%3A35%3A37&SRS=EPSG%3A3857&BBOX={bbox-epsg-3857}"
                         ]
                     , misc =
                         [ 
@@ -109,12 +77,7 @@ view model =
                         , Style.glyphs "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
                         ]
                     , layers =
-                        [ 
-                        --   Layer.background "background"
-                        --     [ E.rgba 246 246 244 1 |> Layer.backgroundColor
-                        --     ]
-                        --, 
-                        Layer.raster "height" "height" []
+                        [ Layer.raster "height" "height" []
                         , Layer.fill "landcover"
                             "composite"
                             [ Layer.sourceLayer "landcover"
@@ -128,33 +91,6 @@ view model =
                             , Layer.fillColor (E.rgba 227 227 227 1)
                             , Layer.fillOpacity (float 0.6)
                             ]
-                        -- , Layer.symbol "place-city-lg-n"
-                        --     "composite"
-                        --     [ Layer.sourceLayer "place_label"
-                        --     , Layer.minzoom 1
-                        --     , Layer.maxzoom 14
-                        --     , Layer.filter <|
-                        --         E.all
-                        --             [ E.getProperty (str "scalerank") |> E.greaterThan (int 2)
-                        --             , E.getProperty (str "type") |> E.isEqual (str "city")
-                        --             ]
-                        --     , Layer.textField <|
-                        --         E.format
-                        --             [ E.getProperty (str "name_en")
-                        --                 |> E.formatted
-                        --                 |> E.fontScaledBy (float 1.2)
-                        --             , E.formatted (str "\n")
-                        --             , E.getProperty (str "name")
-                        --                 |> E.formatted
-                        --                 |> E.fontScaledBy (float 0.8)
-                        --                 |> E.withFont (E.strings [ "DIN Offc Pro Medium" ])
-                        --             ]
-                        --     , Layer.textTransform <| E.ifElse (E.getProperty (str "name_en") |> E.isEqual (str "Vienna")) E.uppercase E.none
-                        --     ]
-                        -- , Layer.fill "changes"
-                        --     "changes"
-                        --     [ Layer.fillOpacity (E.ifElse (E.toBool (E.featureState (str "hover"))) (float 0.9) (float 0.1))
-                        --     ]
                         ]
                     }
                 )

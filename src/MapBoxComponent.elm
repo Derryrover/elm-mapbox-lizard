@@ -108,6 +108,7 @@ view model =
                     , sources =
                         [ Source.vectorFromUrl "composite" "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7,astrosat.07pz1g3y"
                         , Source.geoJSONFromValue "changes" [] geojson
+                        , Source.rasterFromUrl "height" "/api/v3/wms/?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=dem%3Anl&STYLES=dem-nl&FORMAT=image%2Fpng&TRANSPARENT=false&HEIGHT=256&WIDTH=256&TIME=2019-09-12T19%3A35%3A37&SRS=EPSG%3A3857&BBOX={bbox-epsg-3857}"
                         ]
                     , misc =
                         [ Style.name "light"
@@ -117,9 +118,11 @@ view model =
                         , Style.glyphs "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
                         ]
                     , layers =
-                        [ Layer.background "background"
+                        [ 
+                            Layer.background "background"
                             [ E.rgba 246 246 244 1 |> Layer.backgroundColor
                             ]
+                        , Layer.raster "height" "height" []
                         , Layer.fill "landcover"
                             "composite"
                             [ Layer.sourceLayer "landcover"
